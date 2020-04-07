@@ -9,7 +9,7 @@
     "dev": "ts-node-dev --respawn src/server/dev-server.ts",
     "prod": "tsc && node ./build/server/run-server.js",
     "serve": "node ./build/server/run-server.js",
-    "test": "mocha -r ts-node/register tests/**/*.test.ts",
+    "test": "mocha -r ts-node/register tests/**/*.test.ts --exit",
     "lint": "eslint . --ext .ts",
     "prettier-format": "prettier --config .prettierrc \"src/**/*.ts\" --write"
   },
