@@ -9,13 +9,11 @@ import { Router } from 'express';
 const swaggerRouter = Router();
 
 const swaggerDefinition = {
+  openapi: '3.0.0',
   info: {
-    //TODO: replace title with project title
-    title: 'project title',
-    //TODO: replace version with project version
+    title: 'Henry',
     version: '1.0.0',
-    //TODO: replace description with project description
-    description: 'description'
+    description: 'Service to handle all current enrichment data'
   },
   basepath: '/'
 };

@@ -3,27 +3,24 @@ import { Router } from 'express';
 const router = Router();
 
 /**
- * More docs
- *
  * @swagger
- * /api/v1/test-route/{username}:
- *  get:
- *   tags:
- *    - System
- *   description: Example of defining swagger docs
- *   parameters:
- *    - name: username
- *      description: Some string
- *      type: string
- *      in: path
- *      required: false
- *   produces:
- *    - application/json
- *   responses:
- *    200:
- *      description: OK
- *    401:
- *      description: Unauthorized
+ * path:
+ *  /api/v1/test-route/{username}:
+ *    post:
+ *      summary: Example description
+ *      tags: [Example]
+ *      parameters:
+ *        - in: path
+ *          name: username
+ *          schema:
+ *            type: string
+ *          required: true
+ *          description: example of parameter
+ *      responses:
+ *        200:
+ *          description: abc
+ *        400:
+ *          description: cde
  */
 router.get('/test-route/:username', async (req, res) => {
   const { username } = req.params;
