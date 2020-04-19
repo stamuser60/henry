@@ -29,7 +29,6 @@ export interface MPPHermeticity extends MPPEnrichment {
 }
 
 export interface Hermeticity extends Enrichment {
-  timestampUpdated: Date;
   value: number;
   beakID: string;
   status: HermeticityStatus;

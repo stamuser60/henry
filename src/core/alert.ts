@@ -38,7 +38,6 @@ export interface MPPAlert extends MPPEnrichment {
 }
 
 export interface Alert extends Enrichment {
-  timestampUpdated: Date;
   node: string;
   severity: Severity;
   description: string;

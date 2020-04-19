@@ -22,7 +22,7 @@ export interface MPPEnrichment {
 }
 
 export interface Enrichment {
-  timestampCreated: Date;
   origin: string;
-  ID: string;
+  timestampStart: Date;
+  timestampUpdate: Date;
 }

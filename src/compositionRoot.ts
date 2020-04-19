@@ -1,5 +1,4 @@
 import { KafkaEnrichmentDispatcher } from './infrastructure/kafkaDispatcher';
-import { EnrichmentDispatcher } from './core/enrichmentDispatcher';
 import kafka, {
   ConsumerGroupStream,
   ConsumerGroupStreamOptions,
@@ -43,9 +42,9 @@ const cprKafkaProducer = new kafka.Producer(cprClient, producerOptions);
 
 const unityKafkaConsumerGroup = new ConsumerGroupStream(options, CPR_KAFKA_TOPIC);
 
-const enrichmentDispatcher: EnrichmentDispatcher = new KafkaEnrichmentDispatcher(cprKafkaProducer, CPR_KAFKA_TOPIC);
-const dlqDispatcher: EnrichmentDispatcher = new KafkaEnrichmentDispatcher(cprKafkaProducer, CPR_KAFKA_TOPIC);
-const enrichmentConsumer = new KafkaEnrichmentConsumer(unityKafkaConsumerGroup, dlqDispatcher);
+const enrichmentDispatcher = new KafkaEnrichmentDispatcher(cprKafkaProducer, CPR_KAFKA_TOPIC);
+const dlqDispatcher = new KafkaEnrichmentDispatcher(cprKafkaProducer, CPR_KAFKA_TOPIC);
+const enrichmentConsumer = new KafkaEnrichmentConsumer(unityKafkaConsumerGroup, cprKafkaProducer);
 
 cprKafkaProducer.on('error', function(error) {
   logger.error(`MPP kafka producer error: ${error}`);
