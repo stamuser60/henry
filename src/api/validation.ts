@@ -5,6 +5,7 @@ import { Schema, Validator } from 'jsonschema';
 import { hermeticityType } from '../core/hermeticity';
 import { alertType } from '../core/alert';
 import { MPPEnrichment } from '../core/enrichment';
+import { AppError } from '../core/exc';
 
 export const TypeToValidation: { [key in TypeName]: Definition } = {
   [hermeticityType]: hermeticitySchema as Definition,
@@ -22,6 +23,10 @@ export function validateEnrichment(type: TypeName, msg: object): MPPEnrichment {
   const newNodeValidator = new Validator();
   const jsonSchemaOptions = { throwError: true };
   const schema = TypeToValidation[type];
-  newNodeValidator.validate(msg, schema as Schema, jsonSchemaOptions);
+  try {
+    newNodeValidator.validate(msg, schema as Schema, jsonSchemaOptions);
+  } catch (e) {
+    throw new AppError(e.toString(), 422);
+  }
   return msg as MPPEnrichment;
 }

@@ -1,4 +1,3 @@
-import { KafkaEnrichmentDispatcher } from './infrastructure/kafkaDispatcher';
 import kafka, {
   ConsumerGroupStream,
   ConsumerGroupStreamOptions,
@@ -38,35 +37,34 @@ const options: ConsumerGroupStreamOptions = {
 };
 
 const cprClient = new kafka.KafkaClient(cprClientOptions);
-const cprKafkaProducer = new kafka.Producer(cprClient, producerOptions);
+const dlqKafkaProducer = new kafka.Producer(cprClient, producerOptions);
 
-const unityKafkaConsumerGroup = new ConsumerGroupStream(options, CPR_KAFKA_TOPIC);
+const cprKafkaConsumerGroup = new ConsumerGroupStream(options, CPR_KAFKA_TOPIC);
 
-const enrichmentDispatcher = new KafkaEnrichmentDispatcher(cprKafkaProducer, CPR_KAFKA_TOPIC);
-const dlqDispatcher = new KafkaEnrichmentDispatcher(cprKafkaProducer, CPR_KAFKA_TOPIC);
-const enrichmentConsumer = new KafkaEnrichmentConsumer(unityKafkaConsumerGroup, cprKafkaProducer);
+const enrichmentConsumer = new KafkaEnrichmentConsumer(cprKafkaConsumerGroup, dlqKafkaProducer);
 
-cprKafkaProducer.on('error', function(error) {
+dlqKafkaProducer.on('error', function(error) {
   logger.error(`MPP kafka producer error: ${error}`);
 });
-cprKafkaProducer.on('ready', function() {
+dlqKafkaProducer.on('ready', function() {
   logger.debug(`connection to CPR's kafka is complete`);
 });
-unityKafkaConsumerGroup.on('error', function(error: Error): void {
+cprKafkaConsumerGroup.on('error', function(error: Error): void {
   logger.error(`MPP kafka consumer error: ${error}`);
 });
-unityKafkaConsumerGroup.on('connect', function() {
-  logger.debug(`connections to Unity's kafka is complete`);
+cprKafkaConsumerGroup.on('connect', function() {
+  logger.debug(`connections to Cpr's kafka is complete`);
 });
-unityKafkaConsumerGroup.on('rebalancing', function() {
-  logger.debug(`rebalance to Unity's kafka is starting`);
+cprKafkaConsumerGroup.on('rebalancing', function() {
+  logger.debug(`rebalance to Cpr's kafka is starting`);
 });
-unityKafkaConsumerGroup.on('rebalanced', function() {
-  logger.debug(`rebalance to Unity's kafka is complete`);
+cprKafkaConsumerGroup.on('rebalanced', function() {
+  logger.debug(`rebalance to Cpr's kafka is complete`);
 });
 
 const enrichmentRepo: EnrichmentRepo = {
   async addHermeticity(hermeticity: MPPHermeticity): Promise<void> {
+    console.log(hermeticity);
     return;
   },
 
@@ -79,4 +77,4 @@ const enrichmentRepo: EnrichmentRepo = {
   }
 };
 
-export { enrichmentDispatcher, enrichmentConsumer, enrichmentRepo };
+export { enrichmentConsumer, enrichmentRepo };

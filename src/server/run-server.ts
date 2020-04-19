@@ -4,9 +4,9 @@
 
 import app from './server';
 import logger from '../logger';
-import { startConsumingAlerts } from '../api/kafka';
+import { startConsumingEnrichment } from '../api/kafka';
 
-startConsumingAlerts();
+startConsumingEnrichment();
 
 const PORT = process.env.APP_PORT || 4000;
 app.listen(PORT, function() {
