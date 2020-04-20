@@ -44,4 +44,5 @@ export interface Alert extends Enrichment {
   object: string;
   application: string;
   operator: string;
+  key: string;
 }
