@@ -11,3 +11,5 @@ export interface EnrichmentRepo {
   addAlert(alert: MPPAlert): Promise<void>;
   getAllEnrichment(): Promise<AllEnrichmentResponse>;
 }
+
+// TODO: the functions that add enrichments to the repository should retry until they succeed

@@ -16,11 +16,6 @@ async function onMessage(value: object | object[]): Promise<void> {
   }
 }
 
-function onError(error: Error): void {
-  logger.error(`Error while consuming enrichments: \n ${error.stack}`);
-}
-
 export function startConsumingEnrichment(): void {
   enrichmentConsumer.start(onMessage);
-  enrichmentConsumer.onError(onError);
 }

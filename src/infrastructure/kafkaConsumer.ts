@@ -1,4 +1,7 @@
-import { Message, ConsumerGroupStream, Producer } from 'kafka-node';
+import { Message, ConsumerGroupStream, ConsumerGroupStreamOptions } from 'kafka-node';
+import { CprLogger } from '@stamscope/jslogger';
+import { KafkaEnrichmentDispatcher } from './kafkaDispatcher';
+import { CPR_KAFKA_CONN, CPR_KAFKA_GROUP_ID } from '../config';
 
 // TODO: finish writing `sendToDLQ`
 // TODO: finish writing `_commitCB`
@@ -11,10 +14,19 @@ export class KafkaEnrichmentConsumer {
    * and `ConsumerGroupStream`)
    */
   private consumer: ConsumerGroupStream;
-  private dlqProducer: Producer;
-  constructor(consumer: ConsumerGroupStream, dlqProducer: Producer) {
+  private dlqDispatcher: KafkaEnrichmentDispatcher;
+  public name: string;
+  public logger: CprLogger;
+  constructor(
+    name: string,
+    consumer: ConsumerGroupStream,
+    dlqDispatcher: KafkaEnrichmentDispatcher,
+    logger: CprLogger
+  ) {
     this.consumer = consumer;
-    this.dlqProducer = dlqProducer;
+    this.dlqDispatcher = dlqDispatcher;
+    this.name = name;
+    this.logger = logger;
   }
 
   /**
@@ -31,7 +43,7 @@ export class KafkaEnrichmentConsumer {
    *                   If the function throws an error, the message that was passed to the function will be
    *                   send to the DLQ.
    */
-  start(onMessage: (value: object | object[]) => Promise<void>): void {
+  start(onMessage: (message: object | object[]) => Promise<void>): void {
     this.consumer.on('data', async (msg: Message) => {
       this.consumer.pause();
       try {
@@ -47,21 +59,50 @@ export class KafkaEnrichmentConsumer {
 
   _commitCB(error: Error): void {
     if (error) {
-      console.log('commit cb error');
+      this.logger.error(`${this.name} kafka - commit cb error`);
       throw error;
     }
   }
 
   async sendToDLQ(msg: Message): Promise<void> {
-    console.log(`disposed of ${msg} `);
+    this.logger.error(`${this.name} kafka - disposed of ${msg} `);
     this.consumer.commit(msg, false, this._commitCB);
   }
+}
 
-  /**
-   * Register an error handler for any errors occurring on the consumer
-   * @param onError: the callback function we pass to the event handler.
-   */
-  onError(onError: (error: Error) => unknown): void {
-    this.consumer.on('error', onError);
-  }
+export const cprConsumerOptions: ConsumerGroupStreamOptions = {
+  kafkaHost: CPR_KAFKA_CONN,
+  groupId: CPR_KAFKA_GROUP_ID,
+  sessionTimeout: 15000,
+  protocol: ['roundrobin'],
+  encoding: 'utf8',
+  fromOffset: 'latest',
+  outOfRangeOffset: 'earliest',
+  // autoCommit is false so we can manage the commits by ourselves
+  autoCommit: false
+};
+
+export function getConsumer(
+  kafkaName: string,
+  topicName: string,
+  options: ConsumerGroupStreamOptions,
+  dlqDispatcher: KafkaEnrichmentDispatcher,
+  logger: CprLogger
+): KafkaEnrichmentConsumer {
+  const consumerGroupStream = new ConsumerGroupStream(options, topicName);
+  const enrichmentConsumer = new KafkaEnrichmentConsumer(kafkaName, consumerGroupStream, dlqDispatcher, logger);
+  consumerGroupStream.on('error', function(error: Error): void {
+    logger.error(`${kafkaName} consumer error: ${error.stack}`);
+  });
+  consumerGroupStream.on('connect', function() {
+    logger.debug(`connections to ${kafkaName}'s kafka is complete`);
+  });
+  consumerGroupStream.on('rebalancing', function() {
+    logger.debug(`rebalance to ${kafkaName}'s kafka is starting`);
+  });
+  consumerGroupStream.on('rebalanced', function() {
+    logger.debug(`rebalance to ${kafkaName}'s kafka is complete`);
+  });
+
+  return enrichmentConsumer;
 }
