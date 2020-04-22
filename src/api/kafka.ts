@@ -1,17 +1,18 @@
-import { Message } from 'kafka-node';
 import { addEnrichment } from '../app/addEnrichment';
-import { validateEnrichment, validateEnrichmentType } from './validation';
+import { validateEnrichmentsReceived } from './validation';
 import { enrichmentConsumer, enrichmentRepo } from '../compositionRoot';
 import logger from '../logger';
 
-async function onMessage(message: Message): Promise<void> {
+async function onMessage(value: object | object[]): Promise<void> {
   try {
-    const messageObj = JSON.parse(message.value.toString());
-    const type = validateEnrichmentType(messageObj.type);
-    const enrichment = validateEnrichment(type, messageObj);
-    await addEnrichment(enrichment, enrichmentRepo);
+    const valueList = Array.isArray(value) ? value : [value];
+    const enrichments = validateEnrichmentsReceived(valueList);
+    for (const enrichment of enrichments) {
+      await addEnrichment(enrichment, enrichmentRepo);
+    }
   } catch (e) {
     logger.error(`while processing message from cpr's kafka \n ${e.stack}`);
+    throw e;
   }
 }
 
