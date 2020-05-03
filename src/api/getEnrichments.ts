@@ -129,9 +129,9 @@ router.get('/enrichments', async (req, res) => {
     res.send(enrichments).status(200);
   } catch (e) {
     if (e instanceof AppError) {
-      res.send(e).status(e.status);
+      res.status(e.status).send(e);
     } else {
-      res.send(e).status(500);
+      res.status(500).send(e);
     }
   }
 });
