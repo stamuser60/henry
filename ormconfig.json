@@ -1,0 +1,14 @@
+{
+    "type": "mssql",
+    "host": "localhost",
+    "port": 49671,
+    "username": "login2",
+    "password": "login2",
+    "database": "emiDB",
+    "entities": [
+
+        "src/infrastructure/**/*.ts"
+
+        
+        ]
+}

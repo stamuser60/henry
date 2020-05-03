@@ -13,7 +13,7 @@ function modifySchema(schema: Definition): void {
 const program = TJS.getProgramFromFiles([
   resolve('src/core/alert.ts'),
   resolve('src/core/enrichment.ts'),
-  resolve('src/core/hermeticity.ts'),
+  resolve('src/core/hermeticity.ts')
 ]);
 
 const generateArgs: PartialArgs = {
