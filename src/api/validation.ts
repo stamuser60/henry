@@ -1,5 +1,4 @@
 import { alertSchema, hermeticitySchema } from '../infrastructure/schemaGenerator';
-import { Definition } from 'typescript-json-schema';
 import { TypeName } from '../core/types';
 import { Schema, Validator } from 'jsonschema';
 import { hermeticityType } from '../core/hermeticity';
@@ -7,26 +6,44 @@ import { alertType } from '../core/alert';
 import { MPPEnrichment } from '../core/enrichment';
 import { AppError } from '../core/exc';
 
-export const TypeToValidation: { [key in TypeName]: Definition } = {
-  [hermeticityType]: hermeticitySchema as Definition,
-  [alertType]: alertSchema as Definition
+export const TypeToSchema: { [key in TypeName]: Schema } = {
+  [hermeticityType]: hermeticitySchema as Schema,
+  [alertType]: alertSchema as Schema
 };
 
 export function validateEnrichmentType(type: string): TypeName {
-  if (!Object.keys(TypeToValidation).some(value => value === type)) {
-    throw Error(`Enrichment type ${type} was not found, options are: ${Object.keys(TypeToValidation).join(', ')}`);
+  if (!Object.keys(TypeToSchema).some(value => value === type)) {
+    throw Error(`Enrichment type ${type} was not found, options are: ${Object.keys(TypeToSchema).join(', ')}`);
   }
   return type as TypeName;
 }
 
-export function validateEnrichment(type: TypeName, msg: object): MPPEnrichment {
-  const newNodeValidator = new Validator();
-  const jsonSchemaOptions = { throwError: true };
-  const schema = TypeToValidation[type];
+const schemaValidator = new Validator();
+const jsonSchemaOptions = { throwError: true };
+
+function validateSingleEnrichment(type: TypeName, msg: object): MPPEnrichment {
+  const schema = TypeToSchema[type];
   try {
-    newNodeValidator.validate(msg, schema as Schema, jsonSchemaOptions);
+    schemaValidator.validate(msg, schema, jsonSchemaOptions);
   } catch (e) {
     throw new AppError(e.toString(), 422);
   }
   return msg as MPPEnrichment;
+}
+
+type receivedMsg = object & {
+  type?: string;
+};
+
+export function validateEnrichmentsReceived(values: receivedMsg[]): MPPEnrichment[] {
+  const enrichmentsReceived = [];
+  for (const value of values) {
+    if ('type' in value) {
+      const type = validateEnrichmentType(value.type as string);
+      enrichmentsReceived.push(validateSingleEnrichment(type, value));
+    } else {
+      throw new AppError(`message has no type in it ${value}`, 422);
+    }
+  }
+  return enrichmentsReceived;
 }

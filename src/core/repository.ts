@@ -13,3 +13,5 @@ export interface EnrichmentRepo {
   //getAllAlert(): Promise<AllEnrichmentResponse>;
   //getAllHermeticity(): Promise<AllEnrichmentResponse>;
 }
+
+// TODO: the functions that add enrichments to the repository should retry until they succeed
