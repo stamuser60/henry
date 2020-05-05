@@ -1,9 +1,11 @@
 import { Entity, Column, PrimaryColumn, PrimaryGeneratedColumn, CreateDateColumn, Generated } from 'typeorm';
-import { MPPAlert } from '../../core/Alert';
+import { MPPAlert, Severity } from '../../core/Alert';
 
 @Entity()
-export class Alert implements MPPAlert {
+export class Alert {
+  //implements MPPAlert {
   @CreateDateColumn
+  //@Column('datetime', {default: true})
   timestampinserted: Date;
 
   @Column('datetime')
@@ -16,13 +18,13 @@ export class Alert implements MPPAlert {
   origin: string;
 
   @PrimaryColumn('varchar', { length: 100 })
-  ID: number;
+  ID: string;
 
   @Column('varchar', { length: 100 })
   node: string;
 
   @Column('varchar', { length: 100 })
-  severity: string;
+  severity: Severity;
 
   @Column('varchar', { length: 100 })
   description: string;

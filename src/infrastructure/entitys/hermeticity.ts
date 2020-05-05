@@ -1,8 +1,8 @@
 import { Entity, Column, PrimaryColumn, PrimaryGeneratedColumn, CreateDateColumn } from 'typeorm';
-import { MPPHermeticity } from '../../core/hermeticity';
+import { MPPHermeticity, HermeticityStatus } from '../../core/hermeticity';
 
 @Entity()
-export class Hermeticity implements MPPHermeticity {
+export class Hermeticity {
   @CreateDateColumn
   timestampinserted: Date;
 
@@ -16,7 +16,7 @@ export class Hermeticity implements MPPHermeticity {
   origin: string;
 
   @PrimaryColumn('varchar', { length: 100 })
-  ID: number;
+  ID: string;
 
   @Column('int')
   value: number;
@@ -25,7 +25,7 @@ export class Hermeticity implements MPPHermeticity {
   beakID: string;
 
   @Column('varchar', { length: 100 })
-  status: string;
+  status: HermeticityStatus;
 
   @Column('varchar', { length: 100 })
   hasAlert: string;

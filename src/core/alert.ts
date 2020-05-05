@@ -1,4 +1,4 @@
-import { Enrichment, MPPEnrichment, EnrichmentEntity } from './enrichment';
+import { Enrichment, MPPEnrichment } from './enrichment';
 import { EntitySchemaColumnOptions, EntitySchema } from 'typeorm';
 
 export enum Severity {
@@ -47,30 +47,3 @@ export interface Alert extends Enrichment {
   operator: string;
   key: string;
 }
-
-export const Alert = new EntitySchema<Alert>({
-  name: 'alert',
-  columns: {
-    ...EnrichmentEntity,
-    // the CategoryEntity now has the defined id, createdAt, origan columns!
-    // in addition, the following NEW fields are defined
-    severity: {
-      type: String
-    },
-    description: {
-      type: String
-    },
-    object: {
-      type: String
-    },
-    application: {
-      type: String
-    },
-    operator: {
-      type: String
-    },
-    node: {
-      type: String
-    }
-  }
-});

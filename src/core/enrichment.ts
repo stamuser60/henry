@@ -5,11 +5,11 @@ export interface MPPEnrichment {
   /**
    * @format date-time
    */
-  timestampMPP: Date;
+  timestampMPP: String;
   /**
    * @format date-time
    */
-  timestampCreated: Date;
+  timestampCreated: String;
   /**
    * @minLength 1
    */
@@ -29,22 +29,3 @@ export interface Enrichment {
   timestampStart: Date;
   timestampUpdate: Date;
 }
-
-export const EnrichmentEntity = {
-  timestampMPP: {
-    type: Date
-  } as EntitySchemaColumnOptions,
-  timestampCreated: {
-    type: Date
-  } as EntitySchemaColumnOptions,
-  timestampInserted: {
-    type: Date
-  } as EntitySchemaColumnOptions,
-  origin: {
-    type: String
-  } as EntitySchemaColumnOptions,
-  ID: {
-    type: String,
-    primary: true
-  } as EntitySchemaColumnOptions
-};
