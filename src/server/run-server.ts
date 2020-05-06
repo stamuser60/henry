@@ -8,7 +8,6 @@ import { MPPAlert, Severity, alertType } from '../core/alert';
 import { AllEnrichmentResponse, EnrichmentRepo } from '../core/repository';
 import { addEnrichment } from '../app/addEnrichment';
 import { enrichmentRepo } from '../infrastructure/enrichmentRepo';
-import moment from 'moment';
 
 //check if evreting works//
 const test = {
@@ -46,11 +45,10 @@ const test = {
     addEnrichment(hermeticity, enrichmentRepo);
   }
 };
-test.getAllEnrichment();
+//test.getAllEnrichment();
 //test.addAlert()
 //test.addHermeticity()
-//console.log(new Date())
-//startConsumingEnrichment();
+
 const PORT = 4000;
 app.listen(PORT, function() {
   logger.info(`Listening on port ${PORT}`);

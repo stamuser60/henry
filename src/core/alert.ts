@@ -1,5 +1,4 @@
 import { Enrichment, MPPEnrichment } from './enrichment';
-import { EntitySchemaColumnOptions, EntitySchema } from 'typeorm';
 
 export enum Severity {
   normal = 'normal',

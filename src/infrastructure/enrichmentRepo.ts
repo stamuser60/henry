@@ -1,12 +1,13 @@
 import Logger from '../logger';
 import { getConnection, Connection, getManager } from 'typeorm';
-import { Hermeticity } from '../infrastructure/entitys/hermeticity';
+//import { Hermeticity } from '../infrastructure/entitys/hermeticity';
+import { Hermeticity } from '../infrastructure/sql/hermeticity';
 import { createConnection } from 'typeorm';
 import { MPPHermeticity, HermeticityStatus, hermeticityType } from '../core/hermeticity';
 import { MPPAlert, Severity, alertType } from '../core/alert';
-import { Alert } from '../infrastructure/entitys/alert';
+//import { Alert } from '../infrastructure/entitys/alert';
+import { Alert } from '../infrastructure/sql/alert';
 import { AllEnrichmentResponse, EnrichmentRepo } from '../core/repository';
-import moment from 'moment';
 
 export const enrichmentRepo: EnrichmentRepo = {
   async addHermeticity(MPPHermeticity: MPPHermeticity): Promise<void> {
