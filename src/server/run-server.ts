@@ -8,6 +8,7 @@ import { MPPAlert, Severity, alertType } from '../core/alert';
 import { AllEnrichmentResponse, EnrichmentRepo } from '../core/repository';
 import { addEnrichment } from '../app/addEnrichment';
 import { enrichmentRepo } from '../infrastructure/enrichmentRepo';
+import moment from 'moment';
 
 //check if evreting works//
 const test = {
@@ -22,7 +23,7 @@ const test = {
       node: 'node',
       type: alertType,
       severity: Severity.minor,
-      ID: 'ID7',
+      ID: 'ID3',
       description: 'description',
       object: 'object',
       application: 'application',
@@ -35,7 +36,7 @@ const test = {
       timestampCreated: '2015-03-25T12:00:00Z',
       timestampMPP: '2021-03-25T12:00:00Z',
       origin: 'origin',
-      ID: 'ID5',
+      ID: 'ID1',
       type: hermeticityType,
       value: 100,
       beakID: 'beakID',
@@ -45,12 +46,12 @@ const test = {
     addEnrichment(hermeticity, enrichmentRepo);
   }
 };
-//test.getAllEnrichment()
+test.getAllEnrichment();
 //test.addAlert()
 //test.addHermeticity()
-
+//console.log(new Date())
 //startConsumingEnrichment();
 const PORT = 4000;
 app.listen(PORT, function() {
   logger.info(`Listening on port ${PORT}`);
-});
+}); //

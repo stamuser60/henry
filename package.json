@@ -29,6 +29,7 @@
     "express": "^4.17.1",
     "jsonschema": "^1.2.5",
     "kafka-node": "^5.0.0",
+    "moment": "^2.25.3",
     "mssql": "^6.2.0",
     "shortid": "^2.2.15",
     "swagger-jsdoc": "^4.0.0",
