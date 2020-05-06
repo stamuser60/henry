@@ -3,11 +3,7 @@ import { MPPAlert, Severity } from '../../core/Alert';
 
 @Entity()
 export class Alert {
-  //implements MPPAlert {
-  //@CreateDateColumn
-  // @Column({ type: "datetime", default: () => "CURRENT_TIMESTAMP"})
   @Column('datetime')
-  //@Column('datetime', {default: true})
   timestampInserted: Date;
 
   @Column('datetime')

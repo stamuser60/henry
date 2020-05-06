@@ -3,7 +3,6 @@ import { MPPHermeticity, HermeticityStatus } from '../../core/hermeticity';
 
 @Entity()
 export class Hermeticity {
-  //@CreateDateColumn
   @Column('datetime')
   timestampinserted: Date;
 
