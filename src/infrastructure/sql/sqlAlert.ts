@@ -1,8 +1,8 @@
-import { Entity, Column, PrimaryColumn, PrimaryGeneratedColumn, CreateDateColumn, Generated } from 'typeorm';
-import { MPPAlert, Severity } from '../../core/Alert';
+import { Entity, Column, PrimaryColumn, Generated } from 'typeorm';
+import { Severity } from '../../core/Alert';
 
-@Entity()
-export class Alert {
+@Entity('Alert')
+export class SqlAlert {
   @Column('datetime')
   timestampInserted: Date;
 
@@ -40,4 +40,4 @@ export class Alert {
   keyID: string;
 }
 
-export default Alert;
+export default SqlAlert;

@@ -1,27 +1,27 @@
-import Logger from '../../logger';
-import { getConnection, Connection, getManager } from 'typeorm';
-import { Hermeticity } from '../../infrastructure/sql/hermeticity';
+import logger from '../../logger';
+import { getConnection } from 'typeorm';
+import { SqlHermeticity } from '../../infrastructure/sql/sqlHermeticity';
 import { createConnection } from 'typeorm';
-import { MPPHermeticity, HermeticityStatus, hermeticityType } from '../../core/hermeticity';
-import { MPPAlert, Severity, alertType } from '../../core/alert';
-import { Alert } from '../../infrastructure/sql/alert';
+import { MPPHermeticity, Hermeticity } from '../../core/hermeticity';
+import { MPPAlert, Alert } from '../../core/alert';
+import { SqlAlert } from '../../infrastructure/sql/sqlAlert';
 import { AllEnrichmentResponse, EnrichmentRepo } from '../../core/repository';
 
 export const enrichmentRepo: EnrichmentRepo = {
   async addHermeticity(MPPHermeticity: MPPHermeticity): Promise<void> {
     try {
+      const sqlHermeticity = new SqlHermeticity();
+      sqlHermeticity.timestampCreated = new Date(MPPHermeticity.timestampCreated);
+      sqlHermeticity.timestampMPP = new Date(MPPHermeticity.timestampCreated);
+      sqlHermeticity.origin = MPPHermeticity.origin;
+      sqlHermeticity.ID = MPPHermeticity.ID;
+      sqlHermeticity.value = MPPHermeticity.value;
+      sqlHermeticity.beakID = MPPHermeticity.beakID;
+      sqlHermeticity.status = MPPHermeticity.status;
+      sqlHermeticity.hasAlert = MPPHermeticity.hasAlert.toString();
       await createConnection();
-      const hermeticity = new Hermeticity();
-      hermeticity.timestampCreated = new Date(MPPHermeticity.timestampCreated.toString());
-      hermeticity.timestampMPP = new Date(MPPHermeticity.timestampCreated.toString());
-      hermeticity.origin = MPPHermeticity.origin;
-      hermeticity.ID = MPPHermeticity.ID;
-      hermeticity.value = MPPHermeticity.value;
-      hermeticity.beakID = MPPHermeticity.beakID;
-      hermeticity.status = MPPHermeticity.status;
-      hermeticity.hasAlert = MPPHermeticity.hasAlert;
-      await getConnection().manager.save(hermeticity);
-      Logger.info('Hermeticity has been saved');
+      await getConnection().manager.save(sqlHermeticity);
+      logger.info('Hermeticity has been saved');
     } catch (error) {
       console.log(error);
     }
@@ -29,19 +29,24 @@ export const enrichmentRepo: EnrichmentRepo = {
   async addAlert(MPPAlert: MPPAlert): Promise<void> {
     try {
       await createConnection();
-      const alert = new Alert();
-      alert.timestampCreated = new Date(MPPAlert.timestampCreated);
-      alert.timestampMPP = new Date(MPPAlert.timestampMPP);
-      alert.origin = MPPAlert.origin;
-      alert.node = MPPAlert.node;
-      alert.severity = MPPAlert.severity;
-      alert.ID = MPPAlert.ID;
-      alert.description = MPPAlert.description;
-      alert.object = MPPAlert.object;
-      alert.application = MPPAlert.application;
-      alert.operator = MPPAlert.operator;
-      await getConnection().manager.save(alert);
-      Logger.info('Alert has been saved');
+      const sqlAlert = new SqlAlert();
+      sqlAlert.timestampCreated = new Date(MPPAlert.timestampCreated);
+      sqlAlert.timestampMPP = new Date(MPPAlert.timestampMPP);
+      sqlAlert.origin = MPPAlert.origin;
+      sqlAlert.node = MPPAlert.node;
+      sqlAlert.severity = MPPAlert.severity;
+      sqlAlert.ID = MPPAlert.ID;
+      sqlAlert.description = MPPAlert.description;
+      sqlAlert.object = MPPAlert.object;
+      sqlAlert.application = MPPAlert.application;
+      sqlAlert.operator = MPPAlert.operator;
+      try {
+        await getConnection().manager.save(sqlAlert);
+      } catch (error) {
+        console.log('in error');
+      }
+
+      logger.info('Alert has been saved');
     } catch (error) {
       console.log(error);
     }
@@ -49,8 +54,8 @@ export const enrichmentRepo: EnrichmentRepo = {
   async getAllEnrichment(): Promise<AllEnrichmentResponse> {
     try {
       await createConnection();
-      const savedHermeticity = await getConnection().query('EXEC SelectAllActiveHermeticity', [5086]);
-      const savedAlert = await getConnection().query('EXEC SelectAllActiveALert', [5086]);
+      const savedHermeticity: Hermeticity[] = await getConnection().query('EXEC SelectAllActiveHermeticity', [5086]);
+      const savedAlert: Alert[] = await getConnection().query('EXEC SelectAllActiveALert', [5086]);
       const savedEnrichment: AllEnrichmentResponse = { ['alert']: savedAlert, ['hermeticity']: savedHermeticity };
       return savedEnrichment;
     } catch (error) {

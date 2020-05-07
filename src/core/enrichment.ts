@@ -1,6 +1,3 @@
-import { EntitySchema } from 'typeorm';
-import { EntitySchemaColumnOptions } from 'typeorm';
-
 export interface MPPEnrichment {
   /**
    * @format date-time

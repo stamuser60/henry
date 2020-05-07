@@ -1,8 +1,8 @@
 import { Entity, Column, PrimaryColumn, PrimaryGeneratedColumn, CreateDateColumn } from 'typeorm';
-import { MPPHermeticity, HermeticityStatus } from '../../core/hermeticity';
+import { HermeticityStatus } from '../../core/hermeticity';
 
-@Entity()
-export class Hermeticity {
+@Entity({ name: 'hermeticity' })
+export class SqlHermeticity {
   @Column('datetime')
   timestampinserted: Date;
 
@@ -31,4 +31,4 @@ export class Hermeticity {
   hasAlert: string;
 }
 
-export default Hermeticity;
+export default SqlHermeticity;

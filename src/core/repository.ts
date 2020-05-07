@@ -10,8 +10,6 @@ export interface EnrichmentRepo {
   addHermeticity(hermeticity: MPPHermeticity): Promise<void>;
   addAlert(alert: MPPAlert): Promise<void>;
   getAllEnrichment(): Promise<AllEnrichmentResponse>;
-  //getAllAlert(): Promise<AllEnrichmentResponse>;
-  //getAllHermeticity(): Promise<AllEnrichmentResponse>;
 }
 
 // TODO: the functions that add enrichments to the repository should retry until they succeed

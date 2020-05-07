@@ -1,5 +1,4 @@
 import { Enrichment, MPPEnrichment } from './enrichment';
-import { EntitySchemaColumnOptions, EntitySchema, Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 
 export enum HermeticityStatus {
   normal = 'normal',
@@ -23,7 +22,7 @@ export interface MPPHermeticity extends MPPEnrichment {
   /**
    * @minLength 1
    */
-  hasAlert: string;
+  hasAlert: boolean;
   /**
    * @minLength 1
    */
