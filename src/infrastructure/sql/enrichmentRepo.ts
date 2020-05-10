@@ -28,7 +28,8 @@ export const enrichmentRepo: EnrichmentRepo = {
         .execute();
       logger.info('Hermeticity has been saved');
     } catch (error) {
-      if ((error.number = 2627)) logger.info('Hermeticity - this id is alredy exsist in the db');
+      const errorUnequal = 2627;
+      if (error.number === errorUnequal) logger.info('Hermeticity - this id is alredy exsist in the db');
       else console.log(error);
     }
   },
@@ -54,7 +55,8 @@ export const enrichmentRepo: EnrichmentRepo = {
         .execute();
       logger.info('Alert has been saved');
     } catch (error) {
-      if ((error.number = 2627)) logger.info('Alert - this id is alredy exsist in the db');
+      const errorUnequal = 2627;
+      if (error.number === errorUnequal) logger.info('Alert - this id is alredy exsist in the db');
       else console.log(error);
     }
   },
