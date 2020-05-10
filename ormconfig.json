@@ -1,7 +1,7 @@
 {
     "type": "mssql",
     "host": "localhost",
-    "port": 49671,
+    "port": 49672,
     "username": "login2",
     "password": "login2",
     "database": "emiDB",

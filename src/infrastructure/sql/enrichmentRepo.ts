@@ -10,45 +10,52 @@ import { AllEnrichmentResponse, EnrichmentRepo } from '../../core/repository';
 export const enrichmentRepo: EnrichmentRepo = {
   async addHermeticity(MPPHermeticity: MPPHermeticity): Promise<void> {
     try {
-      const sqlHermeticity = new SqlHermeticity();
-      sqlHermeticity.timestampCreated = new Date(MPPHermeticity.timestampCreated);
-      sqlHermeticity.timestampMPP = new Date(MPPHermeticity.timestampCreated);
-      sqlHermeticity.origin = MPPHermeticity.origin;
-      sqlHermeticity.ID = MPPHermeticity.ID;
-      sqlHermeticity.value = MPPHermeticity.value;
-      sqlHermeticity.beakID = MPPHermeticity.beakID;
-      sqlHermeticity.status = MPPHermeticity.status;
-      sqlHermeticity.hasAlert = MPPHermeticity.hasAlert.toString();
       await createConnection();
-      await getConnection().manager.save(sqlHermeticity);
+      await getConnection()
+        .createQueryBuilder()
+        .insert()
+        .into(SqlHermeticity)
+        .values({
+          timestampCreated: new Date(MPPHermeticity.timestampCreated),
+          timestampMPP: new Date(MPPHermeticity.timestampMPP),
+          origin: MPPHermeticity.origin,
+          value: MPPHermeticity.value,
+          beakID: MPPHermeticity.beakID,
+          ID: MPPHermeticity.ID,
+          status: MPPHermeticity.status,
+          hasAlert: MPPHermeticity.hasAlert.toString()
+        })
+        .execute();
       logger.info('Hermeticity has been saved');
     } catch (error) {
-      console.log(error);
+      if ((error.number = 2627)) logger.info('Hermeticity - this id is alredy exsist in the db');
+      else console.log(error);
     }
   },
   async addAlert(MPPAlert: MPPAlert): Promise<void> {
     try {
       await createConnection();
-      const sqlAlert = new SqlAlert();
-      sqlAlert.timestampCreated = new Date(MPPAlert.timestampCreated);
-      sqlAlert.timestampMPP = new Date(MPPAlert.timestampMPP);
-      sqlAlert.origin = MPPAlert.origin;
-      sqlAlert.node = MPPAlert.node;
-      sqlAlert.severity = MPPAlert.severity;
-      sqlAlert.ID = MPPAlert.ID;
-      sqlAlert.description = MPPAlert.description;
-      sqlAlert.object = MPPAlert.object;
-      sqlAlert.application = MPPAlert.application;
-      sqlAlert.operator = MPPAlert.operator;
-      try {
-        await getConnection().manager.save(sqlAlert);
-      } catch (error) {
-        console.log('in error');
-      }
-
+      await getConnection()
+        .createQueryBuilder()
+        .insert()
+        .into(SqlAlert)
+        .values({
+          timestampCreated: new Date(MPPAlert.timestampCreated),
+          timestampMPP: new Date(MPPAlert.timestampMPP),
+          origin: MPPAlert.origin,
+          node: MPPAlert.node,
+          severity: MPPAlert.severity,
+          ID: MPPAlert.ID,
+          description: MPPAlert.description,
+          object: MPPAlert.object,
+          application: MPPAlert.application,
+          operator: MPPAlert.operator
+        })
+        .execute();
       logger.info('Alert has been saved');
     } catch (error) {
-      console.log(error);
+      if ((error.number = 2627)) logger.info('Alert - this id is alredy exsist in the db');
+      else console.log(error);
     }
   },
   async getAllEnrichment(): Promise<AllEnrichmentResponse> {
@@ -59,7 +66,7 @@ export const enrichmentRepo: EnrichmentRepo = {
       const savedEnrichment: AllEnrichmentResponse = { ['alert']: savedAlert, ['hermeticity']: savedHermeticity };
       return savedEnrichment;
     } catch (error) {
-      console.log(error);
+      console.log('error');
     }
   }
 };

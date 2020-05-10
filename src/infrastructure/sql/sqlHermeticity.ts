@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryColumn, PrimaryGeneratedColumn, CreateDateColumn } from 'typeorm';
+import { Entity, Column, PrimaryColumn } from 'typeorm';
 import { HermeticityStatus } from '../../core/hermeticity';
 
 @Entity({ name: 'hermeticity' })
