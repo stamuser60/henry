@@ -7,7 +7,8 @@ import { MPPAlert, Alert } from '../../core/alert';
 import { SqlAlert } from '../../infrastructure/sql/sqlAlert';
 import { AllEnrichmentResponse, EnrichmentRepo } from '../../core/repository';
 import { SqlFatalhError, SqlRetryableError } from '../../core/exc';
-
+///מקסים מותק, לא היה הלי כוח לשנות את כול ההערות
+//ולמחוק את כול הבדי'ות לבדיקה קצרה, את תבדוק ואז אחריי הטסטים אעשה לך כומייט מסודר
 const errorTIMEOUT = 'ETIMEOUT';
 
 export const enrichmentRepo: EnrichmentRepo = {
