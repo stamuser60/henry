@@ -7,10 +7,10 @@ const API_PREFIX = '/api/v1';
 
 const app = express();
 
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+//app.use(bodyParser.json());
+//app.use(bodyParser.urlencoded({ extended: true }));
 
-app.use(API_PREFIX, exampleApi);
+//app.use(API_PREFIX, exampleApi);
 
 app.get('/', (req, res) => res.redirect('/swagger'));
 app.use('/swagger', swaggerui);

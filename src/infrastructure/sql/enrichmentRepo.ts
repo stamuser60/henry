@@ -6,6 +6,9 @@ import { MPPHermeticity, Hermeticity } from '../../core/hermeticity';
 import { MPPAlert, Alert } from '../../core/alert';
 import { SqlAlert } from '../../infrastructure/sql/sqlAlert';
 import { AllEnrichmentResponse, EnrichmentRepo } from '../../core/repository';
+import { SqlFatalhError, SqlRetryableError } from '../../core/exc';
+
+const errorTIMEOUT = 'ETIMEOUT';
 
 export const enrichmentRepo: EnrichmentRepo = {
   async addHermeticity(MPPHermeticity: MPPHermeticity): Promise<void> {
@@ -28,9 +31,15 @@ export const enrichmentRepo: EnrichmentRepo = {
         .execute();
       logger.info('Hermeticity has been saved');
     } catch (error) {
-      const errorUnequal = 2627;
-      if (error.number === errorUnequal) logger.info('Hermeticity - this id is alredy exsist in the db');
-      else console.log(error);
+      if (error.name === 'ConnectionError' || error.number === errorTIMEOUT) {
+        logger.info(`Hermeticity -Timeout or ConnectionError , try agein! the massage is: ${error}`);
+        throw new SqlRetryableError(`Hermeticity - ${error.originalError.info.message}`, 1);
+      } else {
+        logger.info(
+          `Hermeticity -I dont know what wrong, don't try agein! the massage is: ${error.originalError.info.message}`
+        );
+        throw new SqlFatalhError(`Hermeticity - ${error.originalError.info.message}`, 2);
+      }
     }
   },
   async addAlert(MPPAlert: MPPAlert): Promise<void> {
@@ -55,9 +64,15 @@ export const enrichmentRepo: EnrichmentRepo = {
         .execute();
       logger.info('Alert has been saved');
     } catch (error) {
-      const errorUnequal = 2627;
-      if (error.number === errorUnequal) logger.info('Alert - this id is alredy exsist in the db');
-      else console.log(error);
+      if (error.name === 'ConnectionError' || error.number === errorTIMEOUT) {
+        logger.info(`Alert -Timeout or ConnectionError , try agein! the massage is: ${error}`);
+        throw new SqlRetryableError(`Alert - ${error.originalError.info.message}`, 1);
+      } else {
+        logger.info(
+          `Alert -I dont know what wrong, don't try agein! the massage is: ${error.originalError.info.message}`
+        );
+        throw new SqlFatalhError(`Alert - ${error.originalError.info.message}`, 2);
+      }
     }
   },
   async getAllEnrichment(): Promise<AllEnrichmentResponse> {
@@ -68,7 +83,8 @@ export const enrichmentRepo: EnrichmentRepo = {
       const savedEnrichment: AllEnrichmentResponse = { ['alert']: savedAlert, ['hermeticity']: savedHermeticity };
       return savedEnrichment;
     } catch (error) {
-      console.log('error');
+      logger.info(`Alert or Hermeticity -Timeout or ConnectionError , try agein! the massage is: ${error}`);
+      throw new SqlRetryableError(`Alert or Hermeticity- ${error}`, 1);
     }
   }
 };
