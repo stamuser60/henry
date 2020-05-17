@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { getEnrichments } from '../app/getEnrichment';
 import { enrichmentRepo } from '../compositionRoot';
 import { AppError } from '../core/exc';
+import { getConnection } from 'typeorm';
 
 const router = Router();
 
@@ -125,6 +126,11 @@ const router = Router();
  */
 router.get('/enrichments', async (req, res) => {
   try {
+    // await Connection
+    // .getRepository(User)
+    // .createQueryBuilder("user")
+    // .where("user.id = :id", { id: 1 })
+    // .getOne();
     const enrichments = await getEnrichments(enrichmentRepo);
     res.send(enrichments).status(200);
   } catch (e) {
