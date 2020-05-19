@@ -1,7 +1,12 @@
 require('dotenv/config');
-// eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-// @ts-ignore
-import { invalidStructureAlertReceived, invalidStructureHermeticityReceived, mppAlert, mppHermeticity } from './testConfig';
+import {
+  invalidStructureAlertReceived,
+  invalidStructureHermeticityReceived,
+  mppAlert,
+  mppHermeticity
+  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+  // @ts-ignore
+} from './testConfig';
 import { CprLogger } from '@stamscope/jslogger';
 import sinon, { SinonSandbox } from 'sinon';
 import { expect } from 'chai';
