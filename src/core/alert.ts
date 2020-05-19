@@ -1,4 +1,4 @@
-import { Enrichment, MPPEnrichment } from './enrichment';
+import { Incident, Enrichment, ProcessedEnrichment } from './dataItem';
 
 export enum Severity {
   normal = 'normal',
@@ -9,7 +9,8 @@ export enum Severity {
 }
 
 export const alertType = 'alert';
-export interface MPPAlert extends MPPEnrichment {
+
+export interface Alert {
   /**
    * @minLength 1
    */
@@ -31,18 +32,20 @@ export interface MPPAlert extends MPPEnrichment {
    * @minLength 1
    */
   operator: string;
+}
+
+export interface AlertEnrichment extends Alert, Enrichment {
   /**
    * @minLength 1
    */
   type: typeof alertType;
 }
 
-export interface Alert extends Enrichment {
-  node: string;
-  severity: Severity;
-  description: string;
-  object: string;
-  application: string;
-  operator: string;
+export interface ProcessedAlertEnrichment extends Alert, ProcessedEnrichment {
+  type: typeof alertType;
+}
+// TODO: is there a way to do it without duplicating the declaration of `type`
+
+export interface AlertIncident extends Alert, Incident {
   key: string;
 }

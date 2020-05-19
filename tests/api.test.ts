@@ -1,5 +1,5 @@
 require('dotenv/config');
-import { enrichmentRepo } from '../src/compositionRoot';
+import { alertConsumer, infoConsumer, incidentRepo } from '../src/compositionRoot';
 import logger from '../src/logger';
 import { Response } from 'superagent';
 import sinon, { SinonSandbox } from 'sinon';
@@ -8,6 +8,10 @@ import request from 'supertest';
 import app, { API_PREFIX_V1 } from '../src/server/server';
 import * as core from 'express-serve-static-core';
 import { AppError } from '../src/core/exc';
+// eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+// @ts-ignore
+import { mppAlert, mppHermeticity } from './testConfig';
+import { preValidateAlert, preValidateInfo } from '../src/api/preValidate';
 
 function getToApp(app: core.Express, path: string): Promise<Response> {
   return request(app).get(`${API_PREFIX_V1}${path}`);
@@ -21,7 +25,7 @@ describe('api', function() {
     sandbox = sinon.createSandbox();
     // disable logging
     sandbox.stub(logger);
-    stubbedGetAllEnrichments = sandbox.stub(enrichmentRepo, 'getAllEnrichment');
+    stubbedGetAllEnrichments = sandbox.stub(incidentRepo, 'getAllEnrichment');
   });
   afterEach(function() {
     sandbox.restore();
@@ -52,4 +56,41 @@ describe('api', function() {
       expect(response.status).to.be.eq(500);
     });
   });
+  describe('preValidate', function() {
+    describe('preValidateInfo', function() {
+      it('should turn object into list of one object if passed single object', function() {
+        const result = preValidateInfo(mppHermeticity);
+        expect(Array.isArray(result)).to.be.true;
+      });
+    });
+    describe('preValidateAlert', function() {
+      it('should turn object into list of one object if passed single object', function() {
+        const result = preValidateAlert(mppAlert);
+        expect(Array.isArray(result)).to.be.true;
+      });
+      it('should add key with name `type` and value `alert` to each object passed in', function() {
+        const singleObjectResult = preValidateAlert(mppAlert);
+        expect((singleObjectResult[0] as any).type).to.be.eq('alert');
+        const multipleObjectsResult = preValidateAlert(mppAlert);
+        for (const obj of multipleObjectsResult) {
+          expect((obj as any).type).to.be.eq('alert');
+        }
+      });
+    });
+  });
+  // describe('kafka', function() {
+  //   let stubbedInfoConsumer: any;
+  //   let stubbedAlertConsumer: any;
+  //   let stubbedRepo: any;
+  //   beforeEach(function() {
+  //     stubbedInfoConsumer = sandbox.stub(infoConsumer);
+  //     stubbedAlertConsumer = sandbox.stub(alertConsumer);
+  //     stubbedRepo = sandbox.stub(incidentRepo);
+  //   });
+  //   it('should pass', function() {
+  //
+  //   });
+  // });
 });
+
+// TODO: add tests for the kafka part in the api folder

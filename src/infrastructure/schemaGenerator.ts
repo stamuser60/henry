@@ -12,7 +12,7 @@ function modifySchema(schema: Definition): void {
 
 const program = TJS.getProgramFromFiles([
   resolve('src/core/alert.ts'),
-  resolve('src/core/enrichment.ts'),
+  resolve('src/core/dataItem.ts'),
   resolve('src/core/hermeticity.ts')
 ]);
 
@@ -20,14 +20,14 @@ const generateArgs: PartialArgs = {
   required: true
 };
 
-export const hermeticitySchema = TJS.generateSchema(program, 'MPPHermeticity', generateArgs);
-export const alertSchema = TJS.generateSchema(program, 'MPPAlert', generateArgs);
+export const HermeticitySchema = TJS.generateSchema(program, 'HermeticityEnrichment', generateArgs);
+export const AlertSchema = TJS.generateSchema(program, 'AlertEnrichment', generateArgs);
 
-if (!hermeticitySchema) {
+if (!HermeticitySchema) {
   throw Error('Could not find hermeticity schema');
 }
-if (!alertSchema) {
+if (!AlertSchema) {
   throw Error('Could not find alert schema');
 }
-modifySchema(hermeticitySchema);
-modifySchema(alertSchema);
+modifySchema(HermeticitySchema);
+modifySchema(AlertSchema);

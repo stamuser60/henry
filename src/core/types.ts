@@ -1,9 +1,15 @@
-import { Hermeticity, hermeticityType } from './hermeticity';
-import { Alert, alertType } from './alert';
+import { ProcessedHermeticityEnrichment, hermeticityType, HermeticityIncident } from './hermeticity';
+import { AlertIncident, alertType, ProcessedAlertEnrichment } from './alert';
 
 export interface TypeToEnrichment {
-  [hermeticityType]: Hermeticity;
-  [alertType]: Alert;
+  [hermeticityType]: ProcessedHermeticityEnrichment;
+  [alertType]: ProcessedAlertEnrichment;
 }
 
-export type TypeName = keyof TypeToEnrichment;
+export interface TypeToIncident {
+  [hermeticityType]: HermeticityIncident;
+  [alertType]: AlertIncident;
+}
+
+export type TypeNameEnrichment = keyof TypeToEnrichment;
+export type TypeNameIncident = keyof TypeToIncident;

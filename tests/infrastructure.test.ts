@@ -1,7 +1,7 @@
 require('dotenv/config');
 // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
 // @ts-ignore
-import { invalidStructureAlertReceived, invalidStructureHermeticityReceived, mppAlert, mppHermeticity } from './config';
+import { invalidStructureAlertReceived, invalidStructureHermeticityReceived, mppAlert, mppHermeticity } from './testConfig';
 import { CprLogger } from '@stamscope/jslogger';
 import sinon, { SinonSandbox } from 'sinon';
 import { expect } from 'chai';
@@ -10,8 +10,8 @@ import logger from '../src/logger';
 import { ConsumerGroupStream, Message, Producer } from 'kafka-node';
 import { KafkaEnrichmentDispatcher } from '../src/infrastructure/kafkaDispatcher';
 import { KafkaEnrichmentConsumer } from '../src/infrastructure/kafkaConsumer';
-import { Enrichment } from '../src/core/enrichment';
-import { alertSchema, hermeticitySchema } from '../src/infrastructure/schemaGenerator';
+import { Incident } from '../src/core/dataItem';
+import { AlertSchema, HermeticitySchema } from '../src/infrastructure/schemaGenerator';
 import { Schema, Validator } from 'jsonschema';
 
 /**
@@ -69,13 +69,13 @@ describe('Infrastructure', function() {
       kafkaEnrichmentDispatcher = new KafkaEnrichmentDispatcher('test', kafkaProducer, 'test', stubbedLogger);
     });
     it('should call send function on producer passed to it', async function() {
-      await kafkaEnrichmentDispatcher.send([{} as Enrichment]);
+      await kafkaEnrichmentDispatcher.send([{} as Incident]);
       expect((kafkaProducer.send as any).calledOnce).to.be.true;
     });
     it('should retry `send` function 2 times before rethrowing the error', async function() {
       (kafkaProducer as any).send.throws();
       try {
-        await kafkaEnrichmentDispatcher.send([{} as Enrichment]);
+        await kafkaEnrichmentDispatcher.send([{} as Incident]);
       } catch (e) {
         expect((kafkaProducer.send as any).callCount).to.be.eq(3);
         return;
@@ -144,11 +144,11 @@ describe('Infrastructure', function() {
     });
     describe('alert schema', function() {
       it('should not throw any error if passed alert received', function() {
-        schemaValidator.validate(mppAlert, alertSchema as Schema, jsonSchemaOptions);
+        schemaValidator.validate(mppAlert, AlertSchema as Schema, jsonSchemaOptions);
       });
       it('should throw error data passed is not compliant with `AlertReceived` interface', function(done) {
         try {
-          schemaValidator.validate(invalidStructureAlertReceived, alertSchema as Schema, jsonSchemaOptions);
+          schemaValidator.validate(invalidStructureAlertReceived, AlertSchema as Schema, jsonSchemaOptions);
         } catch (e) {
           done();
           return;
@@ -158,11 +158,11 @@ describe('Infrastructure', function() {
     });
     describe('hermeticity schema', function() {
       it('should not throw any error if passed hermeticity received', function() {
-        schemaValidator.validate(mppHermeticity, hermeticitySchema as Schema, jsonSchemaOptions);
+        schemaValidator.validate(mppHermeticity, HermeticitySchema as Schema, jsonSchemaOptions);
       });
       it('should throw error data passed is not compliant with `HermeticityReceived` interface', function(done) {
         try {
-          schemaValidator.validate(invalidStructureHermeticityReceived, hermeticitySchema as Schema, jsonSchemaOptions);
+          schemaValidator.validate(invalidStructureHermeticityReceived, HermeticitySchema as Schema, jsonSchemaOptions);
         } catch (e) {
           done();
           return;

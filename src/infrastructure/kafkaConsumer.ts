@@ -1,7 +1,7 @@
 import { Message, ConsumerGroupStream, ConsumerGroupStreamOptions } from 'kafka-node';
 import { CprLogger } from '@stamscope/jslogger';
 import { KafkaEnrichmentDispatcher } from './kafkaDispatcher';
-import { CPR_KAFKA_CONN, CPR_KAFKA_GROUP_ID } from '../config';
+import { ALERT_KAFKA_CONN, ALERT_KAFKA_GROUP_ID, INFO_KAFKA_CONN, INFO_KAFKA_GROUP_ID } from '../config';
 
 // TODO: finish writing `sendToDLQ`
 // TODO: finish writing `_commitCB`
@@ -70,9 +70,7 @@ export class KafkaEnrichmentConsumer {
   }
 }
 
-export const cprConsumerOptions: ConsumerGroupStreamOptions = {
-  kafkaHost: CPR_KAFKA_CONN,
-  groupId: CPR_KAFKA_GROUP_ID,
+const partialConsumerOptions: Partial<ConsumerGroupStreamOptions> = {
   sessionTimeout: 15000,
   protocol: ['roundrobin'],
   encoding: 'utf8',
@@ -80,6 +78,18 @@ export const cprConsumerOptions: ConsumerGroupStreamOptions = {
   outOfRangeOffset: 'earliest',
   // autoCommit is false so we can manage the commits by ourselves
   autoCommit: false
+};
+
+export const alertConsumerOptions: ConsumerGroupStreamOptions = {
+  kafkaHost: ALERT_KAFKA_CONN,
+  groupId: ALERT_KAFKA_GROUP_ID,
+  ...partialConsumerOptions
+};
+
+export const infoConsumerOptions: ConsumerGroupStreamOptions = {
+  kafkaHost: INFO_KAFKA_CONN,
+  groupId: INFO_KAFKA_GROUP_ID,
+  ...partialConsumerOptions
 };
 
 export function getConsumer(
@@ -91,11 +101,12 @@ export function getConsumer(
 ): KafkaEnrichmentConsumer {
   const consumerGroupStream = new ConsumerGroupStream(options, topicName);
   const enrichmentConsumer = new KafkaEnrichmentConsumer(kafkaName, consumerGroupStream, dlqDispatcher, logger);
+
   consumerGroupStream.on('error', function(error: Error): void {
     logger.error(`${kafkaName} consumer error: ${error.stack}`);
   });
   consumerGroupStream.on('connect', function() {
-    logger.debug(`connections to ${kafkaName}'s kafka is complete`);
+    logger.debug(`connection to ${kafkaName}'s kafka is complete`);
   });
   consumerGroupStream.on('rebalancing', function() {
     logger.debug(`rebalance to ${kafkaName}'s kafka is starting`);

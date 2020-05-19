@@ -1,14 +1,14 @@
-import { MPPHermeticity } from './hermeticity';
-import { MPPAlert } from './alert';
-import { TypeName, TypeToEnrichment } from './types';
+import { ProcessedHermeticityEnrichment } from './hermeticity';
+import { ProcessedAlertEnrichment } from './alert';
+import { TypeNameIncident, TypeToIncident } from './types';
 
 export type AllEnrichmentResponse = {
-  [P in TypeName]: TypeToEnrichment[P][];
+  [P in TypeNameIncident]: TypeToIncident[P][];
 };
 
-export interface EnrichmentRepo {
-  addHermeticity(hermeticity: MPPHermeticity): Promise<void>;
-  addAlert(alert: MPPAlert): Promise<void>;
+export interface IncidentRepo {
+  addHermeticity(hermeticity: ProcessedHermeticityEnrichment): Promise<void>;
+  addAlert(alert: ProcessedAlertEnrichment): Promise<void>;
   getAllEnrichment(): Promise<AllEnrichmentResponse>;
 }
 

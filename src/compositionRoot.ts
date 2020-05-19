@@ -1,21 +1,22 @@
-import { CPR_KAFKA_TOPIC } from './config';
-import { cprConsumerOptions, getConsumer } from './infrastructure/kafkaConsumer';
+import { ALERT_KAFKA_TOPIC, INFO_KAFKA_TOPIC } from './config';
+import { alertConsumerOptions, infoConsumerOptions, getConsumer } from './infrastructure/kafkaConsumer';
 import logger from './logger';
-import { AllEnrichmentResponse, EnrichmentRepo } from './core/repository';
-import { MPPHermeticity } from './core/hermeticity';
-import { MPPAlert } from './core/alert';
+import { AllEnrichmentResponse, IncidentRepo } from './core/repository';
+import { ProcessedHermeticityEnrichment } from './core/hermeticity';
+import { ProcessedAlertEnrichment } from './core/alert';
 import { cprClientOptions, cprProducerOptions, getDispatcher } from './infrastructure/kafkaDispatcher';
 
-const dlqDispatcher = getDispatcher('DLQ', CPR_KAFKA_TOPIC, cprClientOptions, cprProducerOptions, logger);
-const enrichmentConsumer = getConsumer('CPR', CPR_KAFKA_TOPIC, cprConsumerOptions, dlqDispatcher, logger);
+const dlqDispatcher = getDispatcher('DLQ', ALERT_KAFKA_TOPIC, cprClientOptions, cprProducerOptions, logger);
+const alertConsumer = getConsumer(`Alert's CPR`, ALERT_KAFKA_TOPIC, alertConsumerOptions, dlqDispatcher, logger);
+const infoConsumer = getConsumer(`Info's CPR`, INFO_KAFKA_TOPIC, infoConsumerOptions, dlqDispatcher, logger);
 
-const enrichmentRepo: EnrichmentRepo = {
-  async addHermeticity(hermeticity: MPPHermeticity): Promise<void> {
+const incidentRepo: IncidentRepo = {
+  async addHermeticity(hermeticity: ProcessedHermeticityEnrichment): Promise<void> {
     console.log(hermeticity);
     return;
   },
 
-  async addAlert(alert: MPPAlert): Promise<void> {
+  async addAlert(alert: ProcessedAlertEnrichment): Promise<void> {
     console.log(alert);
     return;
   },
@@ -25,4 +26,4 @@ const enrichmentRepo: EnrichmentRepo = {
   }
 };
 
-export { enrichmentConsumer, enrichmentRepo };
+export { alertConsumer, infoConsumer, incidentRepo };

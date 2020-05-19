@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { getEnrichments } from '../app/getEnrichment';
-import { enrichmentRepo } from '../compositionRoot';
+import { incidentRepo } from '../compositionRoot';
 import { AppError } from '../core/exc';
 
 const router = Router();
@@ -55,7 +55,7 @@ const router = Router();
  *          key:
  *            type: string
  *            description: unique string that represents the type of the alert
- *      Hermeticity:
+ *      HermeticityIncident:
  *        type: object
  *        required:
  *          - timestampStart
@@ -79,9 +79,8 @@ const router = Router();
  *            format: date-time
  *            description: string representing the timestamp that the hermeticity was updated
  *          status:
- *            type: integer
- *            enum: [1, 2 ,3]
- *            description: the status of the hermeticity, 1 - normal, 2 - minor, 3 - critical
+ *            type: string
+ *            enum: [normal, minor, critical]
  *          value:
  *            type: integer
  *            minimum: 0
@@ -103,7 +102,7 @@ const router = Router();
  *          hermeticity:
  *            type: array
  *            items:
- *              $ref: '#/components/schemas/Hermeticity'
+ *              $ref: '#/components/schemas/HermeticityIncident'
  */
 
 /**
@@ -112,7 +111,7 @@ const router = Router();
  *  /api/v1/enrichments:
  *    get:
  *      summary: Get all current enrichments
- *      tags: [Enrichment]
+ *      tags: [Incident]
  *      responses:
  *        '200':
  *          description: OK
@@ -125,7 +124,7 @@ const router = Router();
  */
 router.get('/enrichments', async (req, res) => {
   try {
-    const enrichments = await getEnrichments(enrichmentRepo);
+    const enrichments = await getEnrichments(incidentRepo);
     res.send(enrichments).status(200);
   } catch (e) {
     if (e instanceof AppError) {
