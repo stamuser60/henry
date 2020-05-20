@@ -1,5 +1,7 @@
+import { SqlRetryableError } from '../src/infrastructure/sql/exc';
+
 require('dotenv/config');
-import { alertConsumer, infoConsumer, incidentRepo } from '../src/compositionRoot';
+import { incidentRepo } from '../src/compositionRoot';
 import logger from '../src/logger';
 import { Response } from 'superagent';
 import sinon, { SinonSandbox } from 'sinon';
@@ -12,6 +14,8 @@ import { AppError } from '../src/core/exc';
 // @ts-ignore
 import { mppAlert, mppHermeticity } from './testConfig';
 import { preValidateAlert, preValidateInfo } from '../src/api/preValidate';
+import { onMessage } from '../src/api/kafka';
+import { SQL_INSERT_RETRY_INTERVAL_MS } from '../src/config';
 
 function getToApp(app: core.Express, path: string): Promise<Response> {
   return request(app).get(`${API_PREFIX_V1}${path}`);
@@ -20,12 +24,16 @@ function getToApp(app: core.Express, path: string): Promise<Response> {
 describe('api', function() {
   let sandbox: SinonSandbox = (null as unknown) as SinonSandbox;
   let stubbedGetAllEnrichments: sinon.SinonStub;
+  let stubbedAddAlert: sinon.SinonStub;
+  let stubbedAddHermeticity: sinon.SinonStub;
 
   beforeEach(function() {
     sandbox = sinon.createSandbox();
     // disable logging
     sandbox.stub(logger);
     stubbedGetAllEnrichments = sandbox.stub(incidentRepo, 'getAllEnrichment');
+    stubbedAddAlert = sandbox.stub(incidentRepo, 'addAlert');
+    stubbedAddHermeticity = sandbox.stub(incidentRepo, 'addHermeticity');
   });
   afterEach(function() {
     sandbox.restore();
@@ -78,19 +86,35 @@ describe('api', function() {
       });
     });
   });
-  // describe('kafka', function() {
-  //   let stubbedInfoConsumer: any;
-  //   let stubbedAlertConsumer: any;
-  //   let stubbedRepo: any;
-  //   beforeEach(function() {
-  //     stubbedInfoConsumer = sandbox.stub(infoConsumer);
-  //     stubbedAlertConsumer = sandbox.stub(alertConsumer);
-  //     stubbedRepo = sandbox.stub(incidentRepo);
-  //   });
-  //   it('should pass', function() {
-  //
-  //   });
-  // });
+  describe('kafka', function() {
+    describe('onMessage function', function() {
+      it('should retry adding if `SqlRetryableError` occurs', async function() {
+        (incidentRepo as any).addAlert
+          .onFirstCall()
+          .throws(new SqlRetryableError('test error', 500))
+          .onSecondCall()
+          .throws(new SqlRetryableError('test error', 500));
+        const onMessageFunc = onMessage(value => [value]);
+        await onMessageFunc(mppAlert);
+        expect(stubbedAddAlert.calledThrice).to.be.true;
+      });
+      it('should propagate error if its not `DispatchError`', async function() {
+        (incidentRepo as any).addAlert
+          .onFirstCall()
+          .throws(new AppError('test error', 500))
+          .onSecondCall()
+          .throws(new AppError('not dispatch', 500));
+        try {
+          const onMessageFunc = onMessage(value => [value]);
+          await onMessageFunc(mppAlert);
+        } catch (e) {
+          expect(e instanceof AppError).to.be.true;
+          return;
+        }
+        throw new Error('Not error thrown');
+      });
+    });
+  });
 });
 
 // TODO: add tests for the kafka part in the api folder

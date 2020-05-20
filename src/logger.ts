@@ -1,7 +1,7 @@
 import { createLogger, LogLevel } from '@stamscope/jslogger';
 import { CPR_LOG_LEVEL } from './config';
 
-const logger = createLogger({ serviceName: 'MPP' });
+const logger = createLogger({ serviceName: 'Henry' });
 
 function getLogLevel(level: string): LogLevel {
   const levels = ['info', 'error', 'warn', 'silly', 'verbose', 'debug'];
