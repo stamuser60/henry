@@ -11,6 +11,9 @@ export const TypeToSchema: { [key in TypeNameEnrichment]: Schema } = {
   [alertType]: AlertSchema as Schema
 };
 
+/**
+ * if type is not one of the types found in the `TypeToSchema` mapping, will throw an error.
+ */
 export function validateEnrichmentType(type: string): TypeNameEnrichment {
   if (!Object.keys(TypeToSchema).some(value => value === type)) {
     throw Error(`Enrichment type ${type} was not found, options are: ${Object.keys(TypeToSchema).join(', ')}`);
@@ -21,6 +24,11 @@ export function validateEnrichmentType(type: string): TypeNameEnrichment {
 const schemaValidator = new Validator();
 const jsonSchemaOptions = { throwError: true };
 
+/**
+ * Performs validation on single object.
+ *
+ * @param type: based on the type the function decides which validation to perform.
+ */
 function validateSingleEnrichment(type: TypeNameEnrichment, msg: object): Enrichment {
   const schema = TypeToSchema[type];
   try {
@@ -35,9 +43,13 @@ type receivedMsg = object & {
   type?: string;
 };
 
-export function validateEnrichmentsReceived(values: receivedMsg[]): Enrichment[] {
+/**
+ * Receives a list of messages and performs validation on each of them.
+ * If one of them fails, will throw and error.
+ */
+export function validateEnrichmentsReceived(messages: receivedMsg[]): Enrichment[] {
   const enrichmentsReceived = [];
-  for (const value of values) {
+  for (const value of messages) {
     if ('type' in value) {
       const type = validateEnrichmentType(value.type as string);
       enrichmentsReceived.push(validateSingleEnrichment(type, value));

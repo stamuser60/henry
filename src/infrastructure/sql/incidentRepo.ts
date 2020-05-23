@@ -7,9 +7,19 @@ import { AllEnrichmentResponse, IncidentRepo } from '../../core/repository';
 import { SqlRetryableError } from './exc';
 import { AppError } from '../../core/exc';
 
-const errorTIMEOUT = 'ETIMEOUT';
+const ormTimeoutError = 'ETIMEOUT';
+const ormConnectionError = 'ConnectionError';
 
+/**
+ * An implementation of the `IncidentRepo` that uses typeorm & sql server.
+ */
 export const incidentRepo: IncidentRepo = {
+  /**
+   * Adds the processed hermeticity object that has been received.
+   *
+   * If a timeout or connection error occurs, the function will throw an error signaling that it should be retried.
+   * Otherwise, it will throw a generic error.
+   */
   async addHermeticity(hermeticity: ProcessedHermeticityEnrichment): Promise<void> {
     try {
       await getConnection()
@@ -27,7 +37,7 @@ export const incidentRepo: IncidentRepo = {
         })
         .execute();
     } catch (error) {
-      if (error.name === 'ConnectionError' || error.number === errorTIMEOUT) {
+      if (error.name === ormConnectionError || error.number === ormTimeoutError) {
         throw new SqlRetryableError(`Hermeticity - ${error.originalError.info.message}`, 500);
       } else {
         throw new AppError(`Hermeticity - ${error.originalError.info.message}`, 400);
@@ -35,13 +45,18 @@ export const incidentRepo: IncidentRepo = {
     }
   },
   async addAlert(alert: ProcessedAlertEnrichment): Promise<void> {
+    /**
+     * Adds the processed alert object that has been received.
+     *
+     * If a timeout or connection error occurs, the function will throw an error signaling that it should be retried.
+     * Otherwise, it will throw a generic error.
+     */
     try {
       await getConnection()
         .createQueryBuilder()
         .insert()
         .into(SqlAlert)
         .values({
-          // timestampInserted: new Date(MPPAlert.timestampCreated),
           timestamp: new Date(alert.timestamp),
           origin: alert.origin,
           node: alert.node,
@@ -54,7 +69,7 @@ export const incidentRepo: IncidentRepo = {
         })
         .execute();
     } catch (error) {
-      if (error.name === 'ConnectionError' || error.number === errorTIMEOUT) {
+      if (error.name === ormConnectionError || error.number === ormTimeoutError) {
         throw new SqlRetryableError(`Alert - ${error.originalError.info.message}`, 500);
       } else {
         throw new AppError(`Alert - ${error.originalError.info.message}`, 400);
@@ -63,12 +78,11 @@ export const incidentRepo: IncidentRepo = {
   },
   async getAllEnrichment(): Promise<AllEnrichmentResponse> {
     try {
-      // TODO: cant we use the same connection here?
       // TODO: use promise.all() to await to wait for both queries in `getAllEnrichment`
       const savedHermeticity: HermeticityIncident[] = await getConnection().query('EXEC SelectAllActiveHermeticity', [
         5086
       ]);
-      const savedAlert: AlertIncident[] = await getConnection().query('EXEC SelectAllActiveALert', [5086]);
+      const savedAlert: AlertIncident[] = await getConnection().query('EXEC SelectAllActiveAlert', [5086]);
       return { alert: savedAlert, hermeticity: savedHermeticity };
     } catch (error) {
       throw new AppError(`Alert or Hermeticity- ${error}`, 500);
@@ -76,6 +90,14 @@ export const incidentRepo: IncidentRepo = {
   }
 };
 
+/**
+ * Initiates a connection pool to the database.
+ * @param host: database host
+ * @param port: database port
+ * @param username: database username
+ * @param password: database password
+ * @param database: database name
+ */
 export async function sqlCreateGlobalConnection(
   host: string,
   port: number,

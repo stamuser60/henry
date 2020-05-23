@@ -123,6 +123,9 @@ const router = Router();
  *          description: Internal server error
  */
 router.get('/enrichments', async (req, res) => {
+  /**
+   * Returns all current open incidents.
+   */
   try {
     const enrichments = await getEnrichments(incidentRepo);
     res.send(enrichments).status(200);

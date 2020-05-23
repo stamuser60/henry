@@ -1,6 +1,6 @@
 import { KafkaClient, KafkaClientOptions, Producer, ProducerOptions } from 'kafka-node';
 import { Incident } from '../core/dataItem';
-import { ALERT_KAFKA_CONN, ALERT_KAFKA_TOPIC } from '../config';
+import { KAFKA_ALERT_CONN, KAFKA_ALERT_TOPIC } from '../config';
 import { CprLogger } from '@stamscope/jslogger';
 import { AppError } from '../core/exc';
 
@@ -49,7 +49,7 @@ export class KafkaEnrichmentDispatcher {
 }
 
 export const cprClientOptions: KafkaClientOptions = {
-  kafkaHost: ALERT_KAFKA_CONN as string
+  kafkaHost: KAFKA_ALERT_CONN as string
 };
 
 export const cprProducerOptions: ProducerOptions = {
@@ -65,7 +65,7 @@ export function getDispatcher(
 ): KafkaEnrichmentDispatcher {
   const cprClient = new KafkaClient(cprClientOptions);
   const cprKafkaProducer = new Producer(cprClient, producerOptions);
-  const enrichmentDispatcher = new KafkaEnrichmentDispatcher(kafkaName, cprKafkaProducer, ALERT_KAFKA_TOPIC, logger);
+  const enrichmentDispatcher = new KafkaEnrichmentDispatcher(kafkaName, cprKafkaProducer, KAFKA_ALERT_TOPIC, logger);
   cprKafkaProducer.on('error', function(error) {
     logger.error(`${kafkaName} producer error: ${error.stack}`);
   });

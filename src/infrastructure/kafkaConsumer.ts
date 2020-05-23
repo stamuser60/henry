@@ -1,7 +1,7 @@
 import { Message, ConsumerGroupStream, ConsumerGroupStreamOptions } from 'kafka-node';
 import { CprLogger } from '@stamscope/jslogger';
 import { KafkaEnrichmentDispatcher } from './kafkaDispatcher';
-import { ALERT_KAFKA_CONN, ALERT_KAFKA_GROUP_ID, INFO_KAFKA_CONN, INFO_KAFKA_GROUP_ID } from '../config';
+import { KAFKA_ALERT_CONN, KAFKA_ALERT_GROUP_ID, KAFKA_INFO_CONN, KAFKA_INFO_GROUP_ID } from '../config';
 
 // TODO: finish writing `sendToDLQ`
 // TODO: finish writing `_commitCB`
@@ -58,12 +58,17 @@ export class KafkaEnrichmentConsumer {
   }
 
   _commitCB(error: Error): void {
+    // TODO: we gotta check what do we do with this one...
     if (error) {
       this.logger.error(`${this.name} kafka - commit cb error`);
       throw error;
     }
   }
 
+  /**
+   * Responsible for disposing of a problematic message.
+   * In our case, there is not much to do, we just log it and then commit to move to the next one.
+   */
   async sendToDLQ(msg: Message): Promise<void> {
     this.logger.error(`${this.name} kafka - disposed of ${msg} `);
     this.consumer.commit(msg, false, this._commitCB);
@@ -81,17 +86,25 @@ const partialConsumerOptions: Partial<ConsumerGroupStreamOptions> = {
 };
 
 export const alertConsumerOptions: ConsumerGroupStreamOptions = {
-  kafkaHost: ALERT_KAFKA_CONN,
-  groupId: ALERT_KAFKA_GROUP_ID,
+  kafkaHost: KAFKA_ALERT_CONN,
+  groupId: KAFKA_ALERT_GROUP_ID,
   ...partialConsumerOptions
 };
 
 export const infoConsumerOptions: ConsumerGroupStreamOptions = {
-  kafkaHost: INFO_KAFKA_CONN,
-  groupId: INFO_KAFKA_GROUP_ID,
+  kafkaHost: KAFKA_INFO_CONN,
+  groupId: KAFKA_INFO_GROUP_ID,
   ...partialConsumerOptions
 };
 
+/**
+ * Returns a working kafka consumer.
+ * @param kafkaName: a logical name to call the consumer that we create.
+ * @param topicName: the name that the consumer has to read from.
+ * @param options: kafka consumer group options.
+ * @param dlqDispatcher: the dispatcher that the consumer is going to use.
+ * @param logger: a logger for the consumer to use.
+ */
 export function getConsumer(
   kafkaName: string,
   topicName: string,

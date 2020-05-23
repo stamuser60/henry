@@ -6,6 +6,10 @@ import { AppError } from '../core/exc';
 import { ID } from '../core/id';
 
 function processEnrichment(enrichment: Enrichment): ProcessedEnrichment {
+  /**
+   * Generic processing function that should be ran against every enrichment document
+   * to turn it into a `ProcessedEnrichment`
+   */
   return {
     ...enrichment,
     ID: ID()
@@ -13,6 +17,10 @@ function processEnrichment(enrichment: Enrichment): ProcessedEnrichment {
 }
 
 export async function addEnrichment(enrichment: Enrichment, repo: IncidentRepo): Promise<void> {
+  /**
+   * Receives an enrichment object, performs processing on it, and tells the repository to add it,
+   * based on the type key in the enrichment.
+   */
   const processedEnrichment = processEnrichment(enrichment);
   switch (processedEnrichment.type) {
     case alertType:
