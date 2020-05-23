@@ -8,15 +8,10 @@ export class SqlAlert {
   // @ts-ignore
   timestampInserted: Date;
 
-  @Column('datetime')
+  @Column('datetime', { nullable: false })
   // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
   // @ts-ignore
-  timestampCreated: Date;
-
-  @Column('datetime')
-  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-  // @ts-ignore
-  timestampMPP: Date;
+  timestamp: Date;
 
   @Column('varchar', { length: 100 })
   // eslint-disable-next-line @typescript-eslint/ban-ts-ignore

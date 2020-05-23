@@ -2,11 +2,7 @@ export interface MPPEnrichment {
   /**
    * @format date-time
    */
-  timestampMPP: string;
-  /**
-   * @format date-time
-   */
-  timestampCreated: string;
+  timestamp: string;
   /**
    * @minLength 1
    */
