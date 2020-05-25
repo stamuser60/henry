@@ -5,6 +5,8 @@ import { enrichmentRepo } from '../src/infrastructure/sql/enrichmentRepo';
 import { MPPHermeticity, HermeticityStatus, hermeticityType } from '../src/core/hermeticity';
 import { getConnection, createConnection, Connection } from 'typeorm';
 import { SqlHermeticity } from '../src/infrastructure/sql/sqlHermeticity';
+import { AllEnrichmentResponse } from '../src/core/repository';
+import {equal} from 'deep-equal';
 
 let connection: Connection;
 const alert: MPPAlert = {
@@ -36,7 +38,6 @@ describe('core', function() {
   beforeEach(function() {
     return new Promise(resolve => {
       createConnection().then(connectionToDB => {
-        console.log('before each');
         connection = connectionToDB;
         resolve();
       });
@@ -44,7 +45,6 @@ describe('core', function() {
   });
   afterEach(function() {
     return new Promise(resolve => {
-      console.log('afterEach');
       connection.close().then(connectionToDB => {
         resolve();
       });
@@ -53,7 +53,6 @@ describe('core', function() {
 
   describe('Alert', function() {
     it('in Alert, showd get to insert timestampCreated and timestampMPP as string and insert as DATE ', async function() {
-      console.log('in 1 test');
       await enrichmentRepo.addAlert(alert);
       const findAlert = (await connection
         .getRepository(SqlAlert)
@@ -70,9 +69,7 @@ describe('core', function() {
     });
 
     it('in Alert, if whele inserting the db is down the error is "sqlretrayerror ', async function() {
-      console.log('in 2 test');
       let errorStatus = 0;
-
       await connection.close();
       try {
         await enrichmentRepo.addAlert(alert);
@@ -84,7 +81,6 @@ describe('core', function() {
     });
 
     it('in Alert, if whele inserting the db is so slow the insert is failing the error is "sqlretrayerror ', async function() {
-      console.log('in 3 test');
       let errorStatus = 0;
       const connectionForInsert = await createConnection({
         name: 'connectionForInsert',
@@ -117,7 +113,6 @@ describe('core', function() {
     });
 
     it('in Alert, if whele inserting the MPPAlert dont have the right stachar we will get "sqlfatalerror" ', async function() {
-      console.log('in 4 test');
       let errorStatus = 0;
       const alertWitoutNode = {
         origin: 'origin',
@@ -135,11 +130,9 @@ describe('core', function() {
       } catch (error) {
         errorStatus = error.status;
       }
-
       expect(errorStatus).to.be.eq(2);
     });
     it('in Alert, if whele inserting the MPPAlert bad values we will get "sqlfatalerror" ', async function() {
-      console.log('in 5 test');
       let errorStatus = 0;
       const alertWitoutNode = {
         timestamp: '2020123-03-25T12:00:00Z',
@@ -163,11 +156,8 @@ describe('core', function() {
     });
   });
 
-  //////////////////////////////////////////
-  ///////////////////////////////////////////
   describe('Hermeticity', function() {
     it('in Hermeticity, showd get to insert timestampCreated and timestampMPP as string and insert as DATE ', async function() {
-      console.log('in 2.1 test');
       await enrichmentRepo.addHermeticity(hermeticity);
       const findHermeticity = (await connection
         .getRepository(SqlHermeticity)
@@ -184,7 +174,6 @@ describe('core', function() {
     });
 
     it('in Hermeticity, showd get to insert hasAlert as boolean and insert as string ', async function() {
-      console.log('in 2.2 test');
       await enrichmentRepo.addHermeticity(hermeticity);
       const findHermeticity = (await connection
         .getRepository(SqlHermeticity)
@@ -201,9 +190,7 @@ describe('core', function() {
     });
 
     it('in Hermeticity, if whele inserting the db is down the error is "sqlretrayerror ', async function() {
-      console.log('in 2.3 test');
       let errorStatus = 0;
-
       await connection.close();
       try {
         await enrichmentRepo.addHermeticity(hermeticity);
@@ -215,7 +202,6 @@ describe('core', function() {
     });
 
     it('in Hermeticity, if whele inserting the db is so slow the insert is failing the error is "sqlretrayerror ', async function() {
-      console.log('in 2.4 test');
       let errorStatus = 0;
       const connectionForInsert = await createConnection({
         name: 'connectionForInsert',
@@ -248,7 +234,6 @@ describe('core', function() {
     });
 
     it('in Hermeticity, if whele inserting the MPPHermeticity dont have the right stachar we will get "sqlfatalerror" ', async function() {
-      console.log('in 2.5 test');
       let errorStatus = 0;
       const hermeticityWitoutTimestampCreated = {
         origin: 'origin',
@@ -269,7 +254,6 @@ describe('core', function() {
     });
 
     it('in Hermeticity, if whele inserting the MPPAlert bad values we will get "sqlfatalerror" ', async function() {
-      console.log('in 2.6 test');
       let errorStatus = 0;
       const hermeticityWitoutTimestampCreated = {
         timestamp: '2020223-03-25T12:00:00Z',
@@ -286,7 +270,6 @@ describe('core', function() {
       } catch (error) {
         errorStatus = error.status;
       }
-
       expect(errorStatus).to.be.eq(2);
     });
   });
@@ -295,7 +278,6 @@ describe('core', function() {
     it('in getAllEnrichment, if whele selecting the db is down the error is "sqlretrayerror ', async function() {
       console.log('in 3.1 test');
       let errorStatus = 0;
-
       await connection.close();
       try {
         await enrichmentRepo.getAllEnrichment();
@@ -306,48 +288,90 @@ describe('core', function() {
       expect(errorStatus).to.be.eq(1);
     });
 
-    it('in getAllEnrichment, checing thst the stacter thet returns from the faunction is in the correct srachar', async function() {
-      console.log('in 3.2 test');
-      let errorStatus = 0;
-      const connectionForInsert = await createConnection({
-        name: 'connectionForInsert',
-        type: 'mssql',
-        host: 'localhost',
-        port: 49672,
-        username: 'login2',
-        password: 'login2',
-        database: 'emiDB',
-        entities: [SqlHermeticity]
-      });
-      const queryRunner = connection.createQueryRunner();
-      let AllEnrichment;
-      await queryRunner.connect();
-      await queryRunner.startTransaction();
+    it('in getAllEnrichment, checing thst the stacter thet returns from the faunction is in the correct srachar when the table is empty', async function() {
+      let AllEnrichment = { ['alert']: [], ['hermeticity']: [] } as AllEnrichmentResponse;
       try {
+        await getConnection()
+          .createQueryBuilder()
+          .delete()
+          .from(SqlHermeticity)
+          .execute();
         await getConnection()
           .createQueryBuilder()
           .delete()
           .from(SqlAlert)
           .execute();
-        //await getConnection().createQueryBuilder().delete().from(SqlHermeticity).execute();
-        try {
-          //await enrichmentRepo.addAlert(alert);
-          //console.log(await enrichmentRepo.getAllEnrichment())
-          AllEnrichment = await enrichmentRepo.getAllEnrichment();
-        } catch (error) {
-          errorStatus = error.status;
-        }
-        await queryRunner.rollbackTransaction();
+        AllEnrichment = await enrichmentRepo.getAllEnrichment();
       } catch (err) {
-        await queryRunner.rollbackTransaction();
-      } finally {
-        await queryRunner.release();
+        console.log(err);
       }
-      connectionForInsert.close();
-      console.log(Object.prototype.toString.call(AllEnrichment));
-      //expect(errorStatus).to.be.eq(1);
-      console.log(errorStatus);
-      expect(1).to.be.eq(1);
+      const emptyArray: [] = [];
+      if (equal(emptyArray, AllEnrichment.alert)) {
+        expect(1).to.be.eq(1);
+      } else {
+        expect(1).to.be.eq(2);
+      }
+    });
+    it('in getAllEnrichment, checing thst the stacter thet returns from the faunction is in the correct srachar when the table is full', async function() {
+      let AllEnrichment = { ['alert']: [], ['hermeticity']: [] } as AllEnrichmentResponse;
+      try {
+        await enrichmentRepo.addAlert(alert);
+        await enrichmentRepo.addHermeticity(hermeticity);
+        AllEnrichment = await enrichmentRepo.getAllEnrichment();
+        await getConnection()
+          .createQueryBuilder()
+          .delete()
+          .from(SqlAlert)
+          .where('id = :id', { id: alert.ID })
+          .execute();
+        await getConnection()
+          .createQueryBuilder()
+          .delete()
+          .from(SqlHermeticity)
+          .where('id = :id', { id: hermeticity.ID })
+          .execute();
+      } catch (err) {
+        console.log(err);
+      }
+      let allGood = 'yes';
+      if (AllEnrichment.alert != undefined && AllEnrichment.hermeticity != undefined) {
+        AllEnrichment.alert.forEach(element => {
+          if (
+            element.keyId == undefined ||
+            element.LastAlertDT == undefined ||
+            element.FirstNotNormalDT == undefined ||
+            element.origin == undefined ||
+            element.node == undefined ||
+            element.severity == undefined ||
+            element.description == undefined ||
+            element.object == undefined ||
+            element.application == undefined ||
+            element.operator == undefined ||
+            element.ID == undefined
+          ) {
+            allGood = 'no';
+          }
+        });
+
+        AllEnrichment.hermeticity.forEach(element => {
+          if (
+            element.beakID == undefined ||
+            element.LasthermeticityDT == undefined ||
+            element.FirstNotNormalDT == undefined ||
+            element.origin == undefined ||
+            element.status == undefined ||
+            element.hasAlert == undefined ||
+            element.value == undefined ||
+            element.Id == undefined
+          ) {
+            console.log('in test 2', element, allGood);
+            allGood = 'no';
+          }
+        });
+      } else {
+        allGood = 'no';
+      }
+      expect(allGood).to.be.eq('yes');
     });
   });
 });
